@@ -1,0 +1,39 @@
+name: Python syft 
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: Build Python wheel
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Generate SBOM
+        working-directory: python
+        run: |
+          # uv sync creates a virtual environment and installs dependencies which is required for SBOM generation
+          uv sync
+          
+          syft . -o spdx-json | jq . > sbom.json
+
+      - name: Publish Build wheel
+        working-directory: python
+        run: |
+          uv build -wheel --out-dir publish
+          cp sbom.json publish/sbom.json
+          
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4 
+        working-directory: python
+        with:
+          name: artifact
+          path: publish
+
+      - name: Component detection
+        uses: advanced-security/component-detection-dependency-submission-action@v0.0.6
+        with:
+          filePath: dotnet

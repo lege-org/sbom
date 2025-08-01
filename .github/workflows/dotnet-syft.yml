@@ -1,0 +1,50 @@
+name: Dotnet syft 
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: Build dotnet
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.x.x
+
+      - name: Restore NuGet packages
+        working-directory: dotnet
+        run: dotnet restore
+
+      - name: Build solution
+        working-directory: dotnet
+        run: |
+          dotnet build --no-restore --configuration Release
+
+      - name: Publish Application
+        working-directory: dotnet
+        run: |
+          dotnet publish Application/Application.csproj --no-restore --no-build --configuration Release --output publish
+
+      - name: Generate SBOM
+        working-directory: dotnet
+        run: |
+          dotnet tool install --global Microsoft.Sbom.DotNetTool
+          sbom-tool generate -bc . -b ./publish -pn Application -pv 1.0.0 -ps DataHub -li true -V Verbose
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4 
+        working-directory: dotnet
+        with:
+          name: artifact
+          path: publish
+
+      - name: Component detection
+        uses: advanced-security/component-detection-dependency-submission-action@v0.0.6
+        with:
+          filePath: dotnet
