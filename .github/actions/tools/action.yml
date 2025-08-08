@@ -1,0 +1,36 @@
+name: "Install tools"
+description: "Install required tools"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Install Parlay
+      shell: bash
+      run: |
+        wget -qO- https://github.com/snyk/parlay/releases/download/v0.9.0/parlay_Linux_x86_64.tar.gz | sudo tar -xzv -C /usr/bin parlay
+
+    - name: Install Syft
+      shell: bash
+      run: |
+        curl -sSfL https://get.anchore.io/syft | sudo sh -s -- -b /usr/local/bin
+
+    - name: Install Trivy
+      shell: bash
+      run: |
+        curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sudo sh -s -- -b /usr/local/bin v0.65.0
+        
+    - name: Install UV
+      uses: astral-sh/setup-uv@v6
+
+    - name: Install Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20
+
+    - name: Install Terraform
+      uses: hashicorp/setup-terraform@v3
+
+    - name: Setup .NET 
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 9.x.x

@@ -4,5 +4,11 @@ version = "1.0.0"
 description = "A simple Hello World Python project."
 requires-python = ">=3.10"
 dependencies = [
-"orjson>3.10.0"
+  "orjson>3.10.0",
+  "Flask==3.1.1"
+]
+
+[dependency-groups]
+dev = [
+  "pytest"
 ]

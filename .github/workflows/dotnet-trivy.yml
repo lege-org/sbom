@@ -1,11 +1,11 @@
-name: Dotnet syft 
+name: Dotnet trivy 
 
 on:
   workflow_dispatch:
   push:
     branches:
       - main
-      
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -21,11 +21,11 @@ jobs:
         run: |
           dotnet publish Application/Application.csproj --configuration Release --output publish
 
-          syft Application -o spdx-json | jq . > publish/sbom-spdx2_3.json
-          cat publish/sbom-spdx2_3.json | parlay ecosystems enrich - | jq . > publish/sbom-spdx2_3_enriched.json
+          trivy fs --format spdx-json --output publish/sbom-spdx2_2.json Application
+          cat publish/sbom-spdx2_2.json | parlay ecosystems enrich - | jq . > publish/sbom-spdx2_2_enriched.json
 
-          syft Application -o cyclonedx-json | jq . > publish/sbom-cyclonedx1_6.json
-          cat publish/sbom-cyclonedx1_6.json | parlay ecosystems enrich - | jq . > publish/sbom-cyclonedx1_6_enriched.json
+          trivy fs --format cyclonedx --output publish/sbom-cyclonedx.json Application
+          cat publish/sbom-cyclonedx.json | parlay ecosystems enrich - | jq . > publish/sbom-cyclonedx1_6_enriched.json
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4 

@@ -1,4 +1,4 @@
-name: Python syft 
+name: Terraform syft 
 
 on:
   workflow_dispatch:
@@ -17,10 +17,9 @@ jobs:
         uses: ./.github/actions/tools
 
       - name: Generate SBOM
-        working-directory: python
+        working-directory: terraform
         run: |
-          # uv sync creates a virtual environment and installs dependencies which is required for SBOM generation
-          uv sync
+          terraform init
           
           syft . -o spdx-json | jq . > sbom-spdx2_3.json
           cat sbom-spdx2_3.json | parlay ecosystems enrich - | jq . > sbom-spdx2_3_enriched.json
@@ -28,7 +27,8 @@ jobs:
           syft . -o cyclonedx-json | jq . > sbom-cyclonedx1_6.json
           cat sbom-cyclonedx1_6.json | parlay ecosystems enrich - | jq . > sbom-cyclonedx1_6_enriched.json
 
-          uv build --wheel --out-dir publish
+          mkdir -p publish
+
           cp sbom-spdx2_3.json publish/sbom-spdx2_3.json
           cp sbom-spdx2_3_enriched.json publish/sbom-spdx2_3_enriched.json
           cp sbom-cyclonedx1_6.json publish/sbom-cyclonedx1_6.json
@@ -38,4 +38,4 @@ jobs:
         uses: actions/upload-artifact@v4 
         with:
           name: artifact
-          path: python/publish
+          path: terraform/publish

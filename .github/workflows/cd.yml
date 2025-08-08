@@ -1,0 +1,95 @@
+name: CD
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write # VERY IMPORTANT: This is required for the component-detection-dependency-submission-action to work, otherwise it will silently fail
+  id-token: write # VERY IMPORTANT: This is required for the component-detection-dependency-submission-action to work, otherwise it will silently fail
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # see https://github.com/microsoft/component-detection/blob/main/docs/detectors
+      
+      # Ideally we would extract the manifests from the release artifact, but component-detection-dependency-submission-action does not support supplying the manifest files directly.
+      # See https://github.com/advanced-security/component-detection-dependency-submission-action/issues/129
+
+      # python
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+
+      - name: Install pip tools
+        run: |
+          pip install pip-tools
+
+      - name: Generate files needed for component detection
+        working-directory: python
+        run: |
+          # uv sync creates uv.lock file
+          uv sync
+
+          # pip-compile generates requirements.txt from pyproject.toml
+          # pip-compile pyproject.toml
+
+      # There are 3 built-in detectors for python:
+      # 1. PipReport - Depends on requirements.txt (pip-tools) - Dependency extras are not supported, development dependencies are not supported
+      # 2. Pip (DefaultOff) - Depends on requirements.txt (pip-tools) - Dependency extras are not supported, development dependencies are not supported
+      # 3. UvLock (DefaultOff) - Depends on uv.lock
+
+      # Given 3 dependencies in pyproject.toml:
+      # - "orjson>3.10.0"
+      # - "Flask==3.1.1"
+      # - "pytest" (development dependency)
+
+      # PipReport - 8 dependencies found, 8 Explicitly Referenced 
+      # Pip - 9 dependencies found, 8 Explicitly Referenced 
+      # UvLock - 17 dependencies found, 2 Explicitly Referenced 
+
+      # The reason for the difference is that Pip and PipReport ignores dependencies with extras.
+      # UvLock seems like the most accurate detector. But due to the detector being in beta, the tool prevents it from being the only allowed detector. 
+      # See https://github.com/microsoft/component-detection/issues/1457
+
+      - name: Component detection uv
+        uses: advanced-security/component-detection-dependency-submission-action@v0.0.6
+        with:
+          filePath: python
+          # detectorsFilter: UvLock # Cannot be used alone, it is DefaultOff
+          detectorArgs: UvLock=EnableIfDefaultOff
+
+      # Dotnet
+
+      # There are 4 built-in detectors for dotnet:
+      # 1. DotNet - Depends on obj/project.assets.json, uses global.json to determine the SDK version
+      # 2. NuGet - Depends *.nupkg, *.nuspec, nuget.config, paket.lock
+      # 3. NuGetPackagesConfig - Depends on packages.config 
+      # 4. NuGetProjectCentric - Depends on obj/project.assets.json
+
+      # Option: 2 and 3 are non applicable, as we do not use packages.config nor paket
+      # Option: 4 does not include the SDK version
+      # Option: 1 is the last contender and seems to most accurate
+
+      - name: Setup .NET 
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.x.x
+
+      - name: Publish Application
+        working-directory: dotnet
+        run: |
+          dotnet build Application/Application.csproj --configuration Release
+
+      # - name: Component detection DotNet
+      #   uses: advanced-security/component-detection-dependency-submission-action@v0.0.6
+      #   with:
+      #     filePath: dotnet
+      #     detectorsFilter: DotNet
+
+      # NOTES:
+        # 1. It seems that github api does not support multiple submissions for the same commit SHA. E.g if you run the action twice, the results of the first run will be overwritten by the second sumission.

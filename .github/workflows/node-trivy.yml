@@ -1,0 +1,45 @@
+name: Node trivy 
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install tools
+        uses: ./.github/actions/tools
+
+      - name: Generate SBOM
+        working-directory: node
+        run: |
+          npm install
+          
+          trivy fs --format spdx-json --output sbom-spdx2_2.json --include-dev-deps .
+          cat sbom-spdx2_2.json | parlay ecosystems enrich - | jq . > sbom-spdx2_2_enriched.json
+
+          trivy fs --format cyclonedx --output sbom-cyclonedx.json --include-dev-deps .
+          cat sbom-cyclonedx.json | parlay ecosystems enrich - | jq . > sbom-cyclonedx1_6_enriched.json
+
+          # nothing to build for Node, just create dir and copy SBOMs
+          mkdir -p publish
+          rsync -avm --exclude 'node_modules' . publish/
+
+          cp sbom-spdx2_2.json publish/sbom-spdx2_2.json
+          cp sbom-spdx2_2_enriched.json publish/sbom-spdx2_2_enriched.json
+          
+          cp sbom-cyclonedx.json publish/sbom-cyclonedx.json
+          cp sbom-cyclonedx1_6_enriched.json publish/sbom-cyclonedx1_6_enriched.json
+
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4 
+        with:
+          name: artifact
+          path: node/publish

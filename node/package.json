@@ -1,0 +1,10 @@
+{
+    "name": "hello-world",
+    "version": "1.0.0",
+    "dependencies": {
+        "pad-left": "2.1.0"
+    },
+    "devDependencies": {
+        "vite": "^5.0.0"
+    }
+}
