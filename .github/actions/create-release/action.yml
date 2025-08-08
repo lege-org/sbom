@@ -1,0 +1,31 @@
+name: 'Create Release'
+description: 'Zips a directory and creates a GitHub release with the zip as an asset.'
+inputs:
+  directory:
+    description: 'Path to the directory to zip'
+    required: true
+  release_name:
+    description: 'Name of the release'
+    required: true
+  github_token:
+    description: 'GitHub token with repo permissions'
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Zip files for ${{ inputs.package_name }} prerelease
+      uses: thedoctor0/zip-release@0.7.6
+      with:
+        type: zip
+        filename: artifact.zip
+        directory: ${{ inputs.directory }}
+
+    - name: Create Release
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: ${{ inputs.release_name }}_${{ github.run_id }}
+        name: ${{ inputs.release_name }}_${{ github.run_id }}
+        files: artifact.zip
+      env:
+        GITHUB_TOKEN: ${{ inputs.github_token }}

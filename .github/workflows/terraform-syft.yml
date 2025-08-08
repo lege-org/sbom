@@ -39,3 +39,10 @@ jobs:
         with:
           name: artifact
           path: terraform/publish
+
+      - name: Create release
+        uses: ./.github/actions/create-release
+        with:
+          directory: terraform/publish
+          release_name: "terraform_syft"
+          github_token: ${{ secrets.GITHUB_TOKEN }}
