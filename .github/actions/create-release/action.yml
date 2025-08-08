@@ -21,6 +21,10 @@ runs:
         filename: artifact.zip
         directory: ${{ inputs.directory }}
 
+    - name: list 
+      run: |
+        ls
+
     - name: Create Release
       uses: softprops/action-gh-release@v2
       with:
