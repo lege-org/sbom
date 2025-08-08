@@ -21,7 +21,8 @@ runs:
         filename: artifact.zip
         directory: ${{ inputs.directory }}
 
-    - name: list 
+    - name: list
+      shell: bash
       run: |
         ls
 
