@@ -21,16 +21,11 @@ runs:
         filename: artifact.zip
         directory: ${{ inputs.directory }}
 
-    - name: list
-      shell: bash
-      run: |
-        ls
-
     - name: Create Release
       uses: softprops/action-gh-release@v2
       with:
         tag_name: ${{ inputs.release_name }}_${{ github.run_id }}
         name: ${{ inputs.release_name }}_${{ github.run_id }}
-        files: artifact.zip
+        files: ${{ inputs.directory }}/artifact.zip
       env:
         GITHUB_TOKEN: ${{ inputs.github_token }}
