@@ -24,3 +24,10 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh release download -R "${{ github.repository }}" "${{ inputs.release_name }}" -p "artifact.zip"
+
+          unzip artifact.zip -d .
+
+      - name: SBOM upload 
+        uses: advanced-security/spdx-dependency-submission-action@v0.1.1
+        with:
+          filePath: "sbom-spdx2_2_enriched.json"
