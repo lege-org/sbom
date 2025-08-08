@@ -26,3 +26,10 @@ jobs:
         with:
           name: artifact
           path: dotnet/publish
+
+      - name: Create release
+        uses: ./.github/actions/create-release
+        with:
+          directory: dotnet/publish
+          release_name: "dotnet_sbomtool"
+          github_token: ${{ secrets.GITHUB_TOKEN }}
