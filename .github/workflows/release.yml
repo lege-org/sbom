@@ -1,3 +1,5 @@
+name: On release
+
 on:
   release:
     types: [published]
@@ -7,7 +9,7 @@ permissions:
   # id-token: write # VERY IMPORTANT: This is required for the component-detection-dependency-submission-action to work, otherwise it will silently fail
 
 jobs:
-  deploy:
+  on_release:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
