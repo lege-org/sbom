@@ -30,4 +30,4 @@ jobs:
       - name: SBOM upload 
         uses: advanced-security/spdx-dependency-submission-action@v0.1.1
         with:
-          filePath: "sbom-spdx2_2_enriched.json"
+          filePattern: "sbom-spdx2_2_enriched.json"
