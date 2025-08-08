@@ -29,7 +29,7 @@ jobs:
 
           # nothing to build for Node, just create dir and copy SBOMs
           mkdir -p publish
-          rsync -avm --exclude 'node_modules' . publish/
+          rsync -avm --exclude 'node_modules' --exclude '.gitignore' . publish/
 
           cp sbom-spdx2_2.json publish/sbom-spdx2_2.json
           cp sbom-spdx2_2_enriched.json publish/sbom-spdx2_2_enriched.json
