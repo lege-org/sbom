@@ -2,11 +2,10 @@ name: CD
 
 on:
   workflow_dispatch:
-
-  inputs:
-    release_name:
-      description: 'Release name'
-      required: true
+    inputs:
+      release_name:
+        description: 'Release name'
+        required: true
 
 
 permissions:
@@ -24,4 +23,4 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release download -R "${{ github.repository }}" "${{ input.release_name }}" -p "artifact.zip"
+          gh release download -R "${{ github.repository }}" "${{ inputs.release_name }}" -p "artifact.zip"
