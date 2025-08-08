@@ -41,3 +41,10 @@ jobs:
         with:
           name: artifact
           path: python/publish
+
+      - name: Create release
+        uses: ./.github/actions/create-release
+        with:
+          directory: python/publish
+          release_name: "python_trivy"
+          github_token: ${{ secrets.GITHUB_TOKEN }}
