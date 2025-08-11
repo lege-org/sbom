@@ -24,7 +24,7 @@ jobs:
         working-directory: dotnet
         run: |
           dotnet build sbom.sln --configuration release
-          dotnet publish Application/Application.csproj --configuration Release --output publish
+          dotnet publish Energinet.Datahub.Application/Energinet.Datahub.Application.csproj --configuration Release --output publish
 
           trivy fs --format spdx-json --output publish/sbom-spdx2_2.json .
           cat publish/sbom-spdx2_2.json | parlay ecosystems enrich - | jq . > publish/sbom-spdx2_2_enriched.json
@@ -33,10 +33,10 @@ jobs:
           cat publish/sbom-cyclonedx.json | parlay ecosystems enrich - | jq . > publish/sbom-cyclonedx1_6_enriched.json
 
 
-          # trivy fs --format spdx-json --output publish/sbom-spdx2_2.json Application
+          # trivy fs --format spdx-json --output publish/sbom-spdx2_2.json Energinet.Datahub.Application
           # cat publish/sbom-spdx2_2.json | parlay ecosystems enrich - | jq . > publish/sbom-spdx2_2_enriched.json
 
-          # trivy fs --format cyclonedx --output publish/sbom-cyclonedx.json Application
+          # trivy fs --format cyclonedx --output publish/sbom-cyclonedx.json Energinet.Datahub.Application
           # cat publish/sbom-cyclonedx.json | parlay ecosystems enrich - | jq . > publish/sbom-cyclonedx1_6_enriched.json
 
       - name: Upload artifact

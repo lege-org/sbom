@@ -23,12 +23,12 @@ jobs:
       - name: Generate SBOM
         working-directory: dotnet
         run: |
-          dotnet publish Application/Application.csproj --configuration Release --output publish
+          dotnet publish Energinet.Datahub.Application/Energinet.Datahub.Application.csproj --configuration Release --output publish
 
-          syft Application -o spdx-json | jq . > publish/sbom-spdx2_3.json
+          syft Energinet.Datahub.Application -o spdx-json | jq . > publish/sbom-spdx2_3.json
           cat publish/sbom-spdx2_3.json | parlay ecosystems enrich - | jq . > publish/sbom-spdx2_3_enriched.json
 
-          syft Application -o cyclonedx-json | jq . > publish/sbom-cyclonedx1_6.json
+          syft Energinet.Datahub.Application -o cyclonedx-json | jq . > publish/sbom-cyclonedx1_6.json
           cat publish/sbom-cyclonedx1_6.json | parlay ecosystems enrich - | jq . > publish/sbom-cyclonedx1_6_enriched.json
 
       - name: Upload artifact
