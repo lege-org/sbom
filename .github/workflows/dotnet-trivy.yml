@@ -24,13 +24,14 @@ jobs:
         working-directory: dotnet
         run: |
           dotnet build sbom.sln --configuration release
+          dotnet publish Application/Application.csproj --configuration Release --output publish
+
           trivy fs --format spdx-json --output publish/sbom-spdx2_2.json .
           cat publish/sbom-spdx2_2.json | parlay ecosystems enrich - | jq . > publish/sbom-spdx2_2_enriched.json
 
           trivy fs --format cyclonedx --output publish/sbom-cyclonedx.json .
           cat publish/sbom-cyclonedx.json | parlay ecosystems enrich - | jq . > publish/sbom-cyclonedx1_6_enriched.json
 
-          dotnet publish Application/Application.csproj --configuration Release --output publish
 
           # trivy fs --format spdx-json --output publish/sbom-spdx2_2.json Application
           # cat publish/sbom-spdx2_2.json | parlay ecosystems enrich - | jq . > publish/sbom-spdx2_2_enriched.json
