@@ -7,6 +7,8 @@ on:
       - main
     paths:
       - dotnet/**
+      - .github/actions/**
+      - .github/workflows/dotnet-trivy.yml
 
 jobs:
   build:
@@ -21,13 +23,20 @@ jobs:
       - name: Generate SBOM
         working-directory: dotnet
         run: |
-          dotnet publish Application/Application.csproj --configuration Release --output publish
-
-          trivy fs --format spdx-json --output publish/sbom-spdx2_2.json Application
+          dotnet build sbom.sln --configuration release
+          trivy fs --format spdx-json --output publish/sbom-spdx2_2.json .
           cat publish/sbom-spdx2_2.json | parlay ecosystems enrich - | jq . > publish/sbom-spdx2_2_enriched.json
 
-          trivy fs --format cyclonedx --output publish/sbom-cyclonedx.json Application
+          trivy fs --format cyclonedx --output publish/sbom-cyclonedx.json .
           cat publish/sbom-cyclonedx.json | parlay ecosystems enrich - | jq . > publish/sbom-cyclonedx1_6_enriched.json
+
+          dotnet publish Application/Application.csproj --configuration Release --output publish
+
+          # trivy fs --format spdx-json --output publish/sbom-spdx2_2.json Application
+          # cat publish/sbom-spdx2_2.json | parlay ecosystems enrich - | jq . > publish/sbom-spdx2_2_enriched.json
+
+          # trivy fs --format cyclonedx --output publish/sbom-cyclonedx.json Application
+          # cat publish/sbom-cyclonedx.json | parlay ecosystems enrich - | jq . > publish/sbom-cyclonedx1_6_enriched.json
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4 
