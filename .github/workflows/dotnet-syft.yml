@@ -2,9 +2,13 @@ name: Dotnet syft
 
 on:
   workflow_dispatch:
-  # push:
-  #   branches:
-  #     - main
+  push:
+    branches:
+      - main
+    paths:
+      - dotnet/**
+      - .github/actions/**
+      - .github/workflows/dotnet-syft.yml
       
 jobs:
   build:
